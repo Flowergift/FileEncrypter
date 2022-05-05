@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,11 +15,14 @@ namespace FileEncrypter
 
         public byte[]  Password { get; set; }
 
-        internal ImageInfo(byte[] matrix,byte[] password)
+        public byte[] Salt { get; set; }    
+
+        internal ImageInfo(byte[] matrix,byte[] password,byte[] salt)
         { 
         
             Matrix = matrix;
             Password = password;
+            Salt = salt;    
         
         }
 
