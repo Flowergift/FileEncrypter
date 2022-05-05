@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,6 +26,8 @@ namespace FileEncrypter
         internal string password = string.Empty;
 
         internal string[] fileslist = null;
+
+        internal byte[] Salt = null;    
         
         private void log_bgw_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -34,7 +36,7 @@ namespace FileEncrypter
 
                 try
                 {
-                    FileEncryption.FileEncrypt(fileslist[i], password);
+                    FileEncryption.FileEncrypt(fileslist[i], password,Salt);
                     log_bgw.ReportProgress((i+fileslist.Length)/100);
                     File.Delete(fileslist[i]);
                     Invoke(new Action(() => { log_textBox.AppendText(Path.GetFileName(fileslist[i] + " $$Successfully Encrypted$$"+"\r\n")); }));
