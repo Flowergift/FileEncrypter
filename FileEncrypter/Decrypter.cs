@@ -1,4 +1,4 @@
-﻿using Emgu.CV;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using FaceRecognitionDotNet;
 using System;
@@ -33,6 +33,7 @@ namespace FileEncrypter
 
         Image<Bgr, byte> toCompareImage;
 
+        byte[] Salt = null;
 
         static byte[] s_additionalEntropy = { 9, 8, 7, 6, 5 };
 
@@ -176,37 +177,46 @@ namespace FileEncrypter
         }
         private bool chexkimage()
         {
-            FileStream stream = new FileStream(Target_Folder_button.Text+@"\"+ "FileDecrypter.data", FileMode.Open, FileAccess.Read, FileShare.Read);
-            IFormatter formatter = new BinaryFormatter();
-            ImageInfo imageInfo = (ImageInfo)formatter.Deserialize(stream);
-
-
-
-            FaceRecognitionDotNet.Image img = FaceRecognition.LoadImage(toCompareImage.ToBitmap());
-
-            double[] img_matrix = faceRecognition.FaceEncodings(img).ToArray().First().GetRawEncoding();
-
-            byte[] un_prot_password = Unprotect(imageInfo.Password);
-
-            string password = getStringformBytes(un_prot_password);
-
-            this.password = password;
-
-            byte[] ing_info_bytes = Unprotect(imageInfo.Matrix);
-
-            double[] imageMatrix = GetDoublesformBytes(ing_info_bytes);
-
-            DlibDotNet.Matrix<double> matrix1 = new DlibDotNet.Matrix<double>(imageMatrix, 4, 32);
-
-            DlibDotNet.Matrix<double> matrix2 = new DlibDotNet.Matrix<double>(img_matrix, 4, 32);
-
-            if (DlibDotNet.Dlib.Length(matrix1 - matrix2) < 0.6)
+            if (File.Exists(Path.Combine(Target_Folder_button.Text, "FileDecrypter.data")))
             {
+                FileStream stream = new FileStream(Path.Combine(Target_Folder_button.Text, "FileDecrypter.data"), FileMode.Open, FileAccess.Read, FileShare.Read);
+                IFormatter formatter = new BinaryFormatter();
+                ImageInfo imageInfo = (ImageInfo)formatter.Deserialize(stream);
 
-                return true;
+
+
+                FaceRecognitionDotNet.Image img = FaceRecognition.LoadImage(toCompareImage.ToBitmap());
+
+                double[] img_matrix = faceRecognition.FaceEncodings(img).ToArray().First().GetRawEncoding();
+
+                byte[] un_prot_password = Unprotect(imageInfo.Password);
+
+                string password = getStringformBytes(un_prot_password);
+
+                this.password = password;
+
+                this.Salt = imageInfo.Salt;
+
+                byte[] ing_info_bytes = Unprotect(imageInfo.Matrix);
+
+                double[] imageMatrix = GetDoublesformBytes(ing_info_bytes);
+
+                DlibDotNet.Matrix<double> matrix1 = new DlibDotNet.Matrix<double>(imageMatrix, 4, 32);
+
+                DlibDotNet.Matrix<double> matrix2 = new DlibDotNet.Matrix<double>(img_matrix, 4, 32);
+
+                if (DlibDotNet.Dlib.Length(matrix1 - matrix2) < 0.6)
+                {
+
+                    return true;
+
+                }
+            }
+            else {
+
+                MessageBox.Show("cannot Find  FileDecrypter ");
             
             }
-
             return false;
 
 
@@ -304,22 +314,24 @@ namespace FileEncrypter
                 if (Target_Folder_button.Text != String.Empty)
                 {
 
-                    if (chexkimage())
-                    {
-
-
-                        Invoke(new Action(() => { Decrypt_button.Enabled = true; }));
-                        break;
-
-                    }
-                    else {
-
-                        Invoke(new Action(() => { MessageBox.Show("Input Face Doesn´t match with the Face in DataBank"); }));
-
-                    }
+                    break;
 
                 }
             
+            }
+
+            if (chexkimage())
+            {
+
+
+                Invoke(new Action(() => { Decrypt_button.Enabled = true; }));
+
+            }
+            else
+            {
+
+                Invoke(new Action(() => { MessageBox.Show("Input Face Doesn´t match with the Face in DataBank"); }));
+
             }
 
         }
@@ -376,6 +388,7 @@ namespace FileEncrypter
                 DecryptionLog DecryptionLog = new DecryptionLog();
                 DecryptionLog.password = this.password;
                 DecryptionLog.fileslist = encreptedFiles;
+                DecryptionLog.Salt = this.Salt;
                 DecryptionLog.ShowDialog();
 
             }
