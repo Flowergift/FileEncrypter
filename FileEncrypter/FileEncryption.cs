@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,7 @@ namespace FileEncrypter
 {
     internal class FileEncryption
     {
+
 
         [DllImport("KERNEL32.DLL", EntryPoint = "RtlZeroMemory")]
         public static extern bool ZeroMemory(IntPtr Destination, int Length);
@@ -34,12 +35,11 @@ namespace FileEncrypter
 
             return data;
         }
-        internal static void FileEncrypt(string inputFile, string password)
+        internal static void FileEncrypt(string inputFile, string password,byte[] salt)
         {
             //http://stackoverflow.com/questions/27645527/aes-encryption-on-large-files
 
             //generate random salt
-            byte[] salt = GenerateRandomSalt();
 
             //create output file name
             FileStream fsCrypt = new FileStream(inputFile + ".EncryptedFile", FileMode.Create);
@@ -95,10 +95,9 @@ namespace FileEncrypter
             }
         }
 
-        internal static void FileDecrypt(string inputFile, string outputFile, string password)
+        internal static void FileDecrypt(string inputFile, string outputFile, string password,byte[] salt)
         {
             byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(password);
-            byte[] salt = new byte[32];
 
             FileStream fsCrypt = new FileStream(inputFile, FileMode.Open);
             fsCrypt.Read(salt, 0, salt.Length);
