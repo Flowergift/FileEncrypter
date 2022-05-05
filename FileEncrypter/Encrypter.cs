@@ -1,4 +1,4 @@
-﻿using Emgu.CV;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using FaceRecognitionDotNet;
 using System;
@@ -33,6 +33,8 @@ namespace FileEncrypter
         Image<Bgr, byte> imgInput;
 
         Image<Bgr, byte> toCompareImage;
+
+        byte[] Salt = null;
         
 
         static byte[] s_additionalEntropy = { 9, 8, 7, 6, 5 };
@@ -179,7 +181,9 @@ namespace FileEncrypter
 
             byte[] passworbytes = ProtectString(password);
 
-            ImageInfo imageInfo = new ImageInfo(bytes, passworbytes);
+            this.Salt = FileEncryption.GenerateRandomSalt();
+
+            ImageInfo imageInfo = new ImageInfo(bytes, passworbytes,this.Salt);
 
             string targetpath = Target_Folder_button.Text + @"\" + filename;
 
@@ -387,6 +391,7 @@ namespace FileEncrypter
                 EncryptionLog encryptionLog = new EncryptionLog();
                 encryptionLog.password = this.password;
                 encryptionLog.fileslist = stringFiles;
+                encryptionLog.Salt = this.Salt;
                 encryptionLog.ShowDialog();
 
             }
