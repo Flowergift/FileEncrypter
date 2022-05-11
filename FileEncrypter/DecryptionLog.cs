@@ -38,7 +38,7 @@ namespace FileEncrypter
                 try
                 {
                     FileEncryption.FileDecrypt(fileslist[i],fileslist[i].Replace(Path.GetExtension(fileslist[i]),""), password,this.Salt);
-                    log_bgw.ReportProgress((i + fileslist.Count) / 100);
+                    log_bgw.ReportProgress((i / fileslist.Count) * 100);
                     File.Delete(fileslist[i]);
                     Invoke(new Action(() => { log_textBox.AppendText(Path.GetFileName(fileslist[i] + " $$Successfully Decrypted$$" + "\r\n")); }));
                 }
